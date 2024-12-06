@@ -1,0 +1,5 @@
+export enum MESSAGE_MODE {
+  CHANNEL_MESSAGE = 2,
+  DM_MESSAGE = 4,
+  THREAD_MESSAGE = 6,
+}

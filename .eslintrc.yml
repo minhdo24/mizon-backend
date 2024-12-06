@@ -1,0 +1,33 @@
+root: true
+env:
+  es2021: true
+  node: true
+  jest: true
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - prettier
+overrides: []
+parser: "@typescript-eslint/parser"
+parserOptions:
+  project: ./tsconfig.json
+  ecmaVersion: latest
+  sourceType: module
+plugins:
+  - "@typescript-eslint"
+  - prettier
+ignorePatterns:
+  - /*/**/documentation
+  - /*/**/scripts
+settings:
+  import/resolver: typescript
+rules:
+  prettier/prettier: error
+  arrow-body-style: off
+  prefer-arrow-callback: off
+  "@typescript-eslint/interface-name-prefix": off
+  "@typescript-eslint/explicit-function-return-type": off
+  "@typescript-eslint/explicit-module-boundary-types": off
+  "@typescript-eslint/no-explicit-any": off
+  "@typescript-eslint/no-unused-vars": error
+  "@typescript-eslint/no-floating-promises": error

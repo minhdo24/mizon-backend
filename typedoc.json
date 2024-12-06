@@ -1,0 +1,11 @@
+{
+  "entryPointStrategy": "packages",
+  "includeVersion": true,
+  "searchInComments": true,
+  "cleanOutputDir": true,
+  "out": "docs",
+  "entryPoints": [
+    "apps/*",
+    "packages/*"
+  ]
+}
