@@ -14,7 +14,7 @@ import {
   UserChannelAddedEvent,
   UserChannelRemovedEvent,
   UserClanRemovedEvent,
-  Events
+  Events,
 } from "mezon-sdk";
 
 @Injectable()
@@ -29,22 +29,21 @@ export class BotGateway implements OnApplicationBootstrap {
     this.client = clientService.getClient();
   }
 
-    initEvent() {
-        for (const event of Object.keys(Events) as Array<keyof typeof Events>) {
-          const eventValue =
-            Events[event] === 'clan_event_created'
-              ? Events[event].replace(/_/g, '')
-              : Events[event].replace(/_event/g, '').replace(/_/g, '');
-          this.logger.log(`Init event ${eventValue}`);
-          const key = `handle${eventValue}`;
-          if (key in this) {
-            this.client.on(Events[event], this[key], this);
-          }
-        }
+  initEvent() {
+    for (const event of Object.keys(Events) as Array<keyof typeof Events>) {
+      const eventValue =
+        Events[event] === "clan_event_created"
+          ? Events[event].replace(/_/g, "")
+          : Events[event].replace(/_event/g, "").replace(/_/g, "");
+      this.logger.log(`Init event ${eventValue}`);
+      const key = `handle${eventValue}`;
+      if (key in this) {
+        this.client.on(Events[event], this[key as keyof BotGateway] as unknown as any, this);
       }
+    }
+  }
 
-
-   onApplicationBootstrap() {
+  onApplicationBootstrap() {
     this.initEvent();
   }
 
@@ -64,7 +63,7 @@ export class BotGateway implements OnApplicationBootstrap {
     this.eventEmitter.emit(Events.StreamingLeavedEvent, data);
   };
 
-  handleclaneventcreated = (data) => {
+  handleclaneventcreated = (data: any) => {
     this.eventEmitter.emit(Events.ClanEventCreated, data);
   };
 
@@ -80,11 +79,11 @@ export class BotGateway implements OnApplicationBootstrap {
     this.eventEmitter.emit(Events.UserClanRemoved, user);
   }
 
-  handlerole = (data) => {
+  handlerole = (data: any) => {
     this.eventEmitter.emit(Events.RoleEvent, data);
   };
 
-  handleroleassign = (data) => {
+  handleroleassign = (data: any) => {
     this.eventEmitter.emit(Events.RoleAssign, data);
   };
 
@@ -104,40 +103,23 @@ export class BotGateway implements OnApplicationBootstrap {
     this.eventEmitter.emit(Events.UserChannelRemoved, msg);
   };
 
-  handlegivecoffee = async (data) => {
+  handlegivecoffee = async (data: any) => {
     this.eventEmitter.emit(Events.GiveCoffee, data);
   };
 
-  handleaddclanuser = async (data) => {
+  handleaddclanuser = async (data: any) => {
     this.eventEmitter.emit(Events.AddClanUser, data);
   };
 
-  handleroleassigned = async (msg) => {
+  handleroleassigned = async (msg: any) => {
     console.log(msg);
   };
 
   handlechannelmessage = async (msg: ChannelMessage) => {
     if (msg.code) return; // ignored edited message
-    ['attachments', 'mentions', 'references'].forEach((key) => {
-      if (!Array.isArray(msg[key])) msg[key] = [];
+    (["attachments", "mentions", "references"] as (keyof ChannelMessage)[]).forEach((key) => {
+      if (!Array.isArray(msg[key])) (msg[key] as unknown) = [];
     });
-    try {
-      if (msg.sender_id && msg.sender_id !== '0') {
-        await this.extendersService.addDBUser(msg);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-    const webhook = await this.userRepository.find({
-      where: { roles: IsNull(), user_type: EUserType.MEZON },
-    });
-    const webhookId = webhook.map((item) => item.userId);
-    // if (webhookId.includes(msg.sender_id)) return;
     this.eventEmitter.emit(Events.ChannelMessage, msg);
   };
-}
-
-  handleuserclanremoved(user: UserClanRemovedEvent) {
-    this.eventEmitter.emit("UserClanRemoved", user);
-  }
 }

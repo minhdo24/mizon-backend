@@ -104,7 +104,10 @@
     "winston": "3.8.2",
     "xrpl": "3.0.0",
     "libphonenumber-js": "1.11.1",
-    "mezon-sdk": "^2.7.68"
+    "mezon-sdk": "^2.7.68",
+    "googleapis": "^144.0.0",
+    "chrono-node": "^2.7.7",
+    "parse-duration": "^1.1.0"
   },
   "devDependencies": {
     "@nestjs/testing": "9.4.3"
