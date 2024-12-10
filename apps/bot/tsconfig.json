@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "paths": {
+      "#src/*": ["src/*"]
+    },
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*", "scripts/**/*", "test/**/*", "__mocks__/**/*", "database/**/*", "jest.config.ts", "typeorm.config.ts"],
+  "exclude": ["node_modules", "dist", "documentation"]
+}

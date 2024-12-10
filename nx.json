@@ -1,0 +1,91 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "main",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "packages"
+  },
+  "namedInputs": {
+    "typescript": [
+      "{workspaceRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.build.json"
+    ],
+    "eslint": [
+      "typescript",
+      "{workspaceRoot}/.eslintrc.yml",
+      "{projectRoot}/.eslintrc.yml"
+    ],
+    "jest": [
+      "typescript",
+      "{workspaceRoot}/jest.config.ts",
+      "{projectRoot}/jest.config.ts"
+    ],
+    "src": [
+      "typescript",
+      "{projectRoot}/src/**/*"
+    ],
+    "tests": [
+      "src",
+      "jest",
+      "{projectRoot}/test/**/*",
+      "{projectRoot}/tests/**/*"
+    ],
+    "lint": [
+      "src",
+      "eslint",
+      "tests"
+    ]
+  },
+  "targetDefaults": {
+    "lint": {
+      "cache": true,
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "eslintConfig": ".eslintrc.yml",
+        "ignorePath": "{workspaceRoot}/.gitignore",
+        "cache": true,
+        "cacheLocation": "{projectRoot}/.cache/eslint/"
+      },
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "lint"
+      ],
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    },
+    "build": {
+      "cache": true,
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "src"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
+    },
+    "test": {
+      "cache": true,
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.ts"
+      },
+      "dependsOn": [
+        "^build",
+        "^test"
+      ],
+      "inputs": [
+        "tests"
+      ],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.cache/test/junit.xml"
+      ]
+    }
+  }
+}
