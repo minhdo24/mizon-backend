@@ -4,14 +4,20 @@ import { type MezonConfig } from "./mezon.config";
 import { type SheetConfig } from "./sheet.config";
 import { type TimeSheetConfig } from "./time-sheet.config";
 import { type WorkFromHomeConfig } from "./work-from-home.config";
-import { TrackerConfig } from "./tracker.config";
+import { type TrackerConfig } from "./tracker.config";
 export interface Config {
   app: AppConfig;
+
   database: DatabaseConfig;
+
   mezon: MezonConfig;
+
   sheet: SheetConfig;
+
   timeSheet: TimeSheetConfig;
+
   workFromHome: WorkFromHomeConfig;
+
   tracker: TrackerConfig;
 }
 

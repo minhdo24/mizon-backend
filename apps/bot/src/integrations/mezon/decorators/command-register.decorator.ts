@@ -1,4 +1,4 @@
-import { CommandStorage } from "#src/integrations";
+import { CommandStorage } from "#src/integrations/mezon/modules/storage";
 
 export function Command(commandName: string): (target: any) => void {
   return function (target: any): void {

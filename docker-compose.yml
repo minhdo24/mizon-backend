@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: postgres:15.0-alpine
+    container_name: mezon-postgres
+    environment:
+       POSTGRES_DB: komu
+       POSTGRES_USER: postgres
+       POSTGRES_PASSWORD: localdev
+       PGDATA: /data/postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - mezon-postgres-data:/data/postgres
+    networks:
+      - mezon-network
+
+volumes:
+  mezon-postgres-data:
+
+networks:
+  mezon-network:

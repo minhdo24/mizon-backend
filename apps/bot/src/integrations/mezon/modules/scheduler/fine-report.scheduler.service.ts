@@ -1,48 +1,39 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, forwardRef, Inject } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import moment from "moment";
-import {
-  MessageQueueService,
-  ReportDailyService,
-  WorkFromHomeService,
-  TrackerService,
-  MESSAGE_MODE,
-} from "#src/integrations";
-import { RoleMezonService } from "#src/modules";
+import { MessageQueueService, MESSAGE_MODE, ExcelService } from "#src/integrations";
+import { RoleService } from "#src/modules";
 import { ConfigService } from "@nestjs/config";
 import { Config } from "#src/config";
 import { In } from "typeorm";
-import { google } from "googleapis";
+import { ChannelMessage } from "mezon-sdk";
+import { replyMessageGenerate, type WrapperType } from "#src/utils";
 
 @Injectable()
 export class FineReportSchedulerService {
   private readonly logger = new Logger(FineReportSchedulerService.name);
-  private readonly clandNccId = this.configService.getOrThrow("mezon.komubotrestClanNccId");
+  private readonly clandNccId = this.configService.getOrThrow("mezon.komubotrestClanNccId", { infer: true });
 
-  private readonly mezonNhacuachungChannelId = this.configService.getOrThrow("mezon.mezonNhacuachungChannelId");
-
-  private readonly sheetId = this.configService.getOrThrow("sheet.sheetFineId");
-
-  private readonly sheetClientId = this.configService.getOrThrow("sheet.sheetClientId");
-
-  private readonly sheetClientSecret = this.configService.getOrThrow("sheet.sheetClientSecret");
-
-  private readonly sheetRefreshToken = this.configService.getOrThrow("sheet.sheetRefreshToken");
+  private readonly mezonNhacuachungChannelId = this.configService.getOrThrow("mezon.mezonNhacuachungChannelId", {
+    infer: true,
+  });
 
   constructor(
-    private readonly messageQueueService: MessageQueueService,
-    private readonly reportDailyService: ReportDailyService,
-    private readonly workFromHomeService: WorkFromHomeService,
-    private readonly trackerService: TrackerService,
+    @Inject(forwardRef(() => MessageQueueService))
+    private readonly messageQueueService: WrapperType<MessageQueueService>,
+
     private readonly configService: ConfigService<Config>,
-    private readonly roleMezonService: RoleMezonService,
+
+    private readonly roleService: RoleService,
+
+    private readonly excelService: ExcelService,
   ) {}
 
   @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_8AM, {
     timeZone: "Asia/Ho_Chi_Minh",
   })
   async dailyReportScheduler() {
-    const data = await this.calculateAndUpdateSheet();
+    const data = await this.excelService.reportSheet();
 
     const messageContent = `
     @STAFF @INTERN 
@@ -56,7 +47,7 @@ export class FineReportSchedulerService {
       .trim();
 
     const roleTitles = ["STAFF", "INTERN"];
-    const roles = await this.roleMezonService.find({
+    const roles = await this.roleService.find({
       where: {
         clan_id: this.clandNccId,
         title: In(roleTitles),
@@ -97,60 +88,6 @@ export class FineReportSchedulerService {
     this.messageQueueService.addMessage(replyMessage);
   }
 
-  private async calculateAndUpdateSheet(reportDate?: moment.Moment, sheetId?: string) {
-    try {
-      const now = moment();
-
-      if (!reportDate) {
-        // reportDate = getPreviousWorkingDay(now);
-      }
-
-      if (!sheetId) {
-        sheetId = this.sheetId;
-      }
-
-      const parsedDate = reportDate.startOf("day").toDate();
-      const formatedDate = reportDate.format("DD/MM/YYYY");
-
-      const [daily, mention, wfh, tracker] = await Promise.all([
-        this.reportDailyService.getUserNotDaily(parsedDate),
-        this.workFromHomeService.reportMachleo(parsedDate),
-        this.workFromHomeService.reportWfh([, formatedDate], false),
-        this.trackerService.reportTrackerNot([, formatedDate], false),
-      ]);
-
-      const notDaily = daily?.notDaily;
-
-      const oauth2Client = new google.auth.OAuth2(this.sheetClientId, this.sheetClientSecret);
-      oauth2Client.setCredentials({
-        refresh_token: this.sheetRefreshToken,
-      });
-
-      const sheets = google.sheets({
-        version: "v4",
-        auth: oauth2Client,
-      });
-
-      const excelProcessor = new ExcelProcessor(reportDate, sheetId, sheets);
-      await excelProcessor.initSheetData();
-
-      handleDailyFine(notDaily, excelProcessor);
-      handleMentionFine(mention, excelProcessor);
-      handleWFHFine(wfh, excelProcessor);
-      handleTrackerFine(tracker, excelProcessor);
-
-      await excelProcessor.saveChange();
-
-      return {
-        reportDate,
-        sheetUrl: `https://docs.google.com/spreadsheets/d/${sheetId}`,
-      };
-    } catch (error) {
-      this.logger.error("calculateAndUpdateSheet_error", error);
-      throw error;
-    }
-  }
-
   async excuteReport(channelMessage: ChannelMessage, reportDate: moment.Moment, sheetId?: string) {
     if (reportDate.isSameOrAfter(moment(), "day")) {
       return replyMessageGenerate(
@@ -174,7 +111,7 @@ export class FineReportSchedulerService {
       );
     }
 
-    const { sheetUrl } = await this.calculateAndUpdateSheet(reportDate, sheetId);
+    const { sheetUrl } = await this.excelService.reportSheet(reportDate, sheetId);
 
     const messageContent = `
       File saodo đã được cập nhật

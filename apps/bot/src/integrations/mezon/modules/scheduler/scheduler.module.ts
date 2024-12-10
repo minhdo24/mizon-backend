@@ -1,11 +1,11 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { FineReportSchedulerService } from "./fine-report.scheduler.service";
-import { MessageQueueModule, ReportModule, WorkFromHomeModule, TrackerModule } from "#src/integrations";
-import { RoleMezonModule } from "#src/modules";
+import { MessageQueueModule, ExcelModule } from "#src/integrations";
+import { RoleModule } from "#src/modules";
 
 @Module({
-  imports: [ConfigModule, MessageQueueModule, ReportModule, WorkFromHomeModule, TrackerModule, RoleMezonModule],
+  imports: [ConfigModule, forwardRef(() => MessageQueueModule), RoleModule, ExcelModule],
   providers: [FineReportSchedulerService],
   exports: [FineReportSchedulerService],
 })

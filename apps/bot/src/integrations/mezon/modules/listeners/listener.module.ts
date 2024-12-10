@@ -1,9 +1,13 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { ListenersService } from "./listeners.service";
-import { MezonModule, Asterisk, MessageQueueModule } from "#src/integrations";
+import { ClientModule, AsteriskCommandModule, MessageQueueModule } from "#src/integrations";
 
 @Module({
-  imports: [forwardRef(() => MezonModule), forwardRef(() => Asterisk), forwardRef(() => MessageQueueModule)],
+  imports: [
+    forwardRef(() => ClientModule),
+    forwardRef(() => AsteriskCommandModule),
+    forwardRef(() => MessageQueueModule),
+  ],
   providers: [ListenersService],
   exports: [ListenersService],
 })

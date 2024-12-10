@@ -5,8 +5,9 @@ import { resolve } from "node:path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import * as allConfigs from "./config";
-import { RoleMezonModule } from "./modules";
+import { RoleModule } from "#src/modules";
 import { AxiosModule, MezonModule, TimeSheetModule, TrackerModule, WorkFromHomeModule } from "#src/integrations";
+import { Config } from "#src/config";
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AxiosModule, MezonModule, TimeSheetModule, TrackerModule, WorkFromHomeM
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService<Config>) => ({
         type: "postgres",
         host: config.getOrThrow("database.host", { infer: true }),
         port: config.getOrThrow("database.port", { infer: true }),
@@ -35,7 +36,7 @@ import { AxiosModule, MezonModule, TimeSheetModule, TrackerModule, WorkFromHomeM
       }),
     }),
     AxiosModule,
-    RoleMezonModule,
+    RoleModule,
     MezonModule,
     TimeSheetModule,
     TrackerModule,

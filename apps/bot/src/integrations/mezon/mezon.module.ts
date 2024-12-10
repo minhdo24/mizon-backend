@@ -1,5 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { Module } from "@nestjs/common";
 import {
   AsteriskCommandModule,
   EventModule,
@@ -8,21 +7,21 @@ import {
   ReportModule,
   SchedulerModule,
   StorageModule,
+  ClientModule,
 } from "./modules";
-import { MezonClientService } from "./mezon.service";
 
 @Module({
   imports: [
-    ConfigModule,
+    StorageModule,
     AsteriskCommandModule,
-    forwardRef(() => EventModule),
-    forwardRef(() => ListenerModule),
+    EventModule,
+    ListenerModule,
     MessageQueueModule,
     ReportModule,
     SchedulerModule,
-    StorageModule,
+    ClientModule,
   ],
-  providers: [MezonClientService],
-  exports: [MezonClientService],
+  providers: [],
+  exports: [],
 })
 export class MezonModule {}

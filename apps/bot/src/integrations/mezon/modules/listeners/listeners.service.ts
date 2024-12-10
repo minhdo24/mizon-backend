@@ -1,18 +1,23 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
+import { Injectable, forwardRef, Inject } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { Events } from "mezon-sdk";
-import type { ChannelMessage } from "mezon-sdk";
-import { MezonClientService, Asterisk, MessageQueueService } from "#src/integrations";
-import { WrapperType } from "#src/utils";
+import type { ChannelMessage, MezonClient } from "mezon-sdk";
+import { ClientService, Asterisk, MessageQueueService } from "#src/integrations";
+import { type WrapperType } from "#src/utils";
 
 @Injectable()
 export class ListenersService {
-  private client: any;
+  private client: MezonClient;
 
   constructor(
-    @Inject(forwardRef(() => MezonClientService)) private clientService: WrapperType<MezonClientService>,
-    @Inject(forwardRef(() => Asterisk)) private asteriskCommand: WrapperType<Asterisk>,
-    @Inject(forwardRef(() => MessageQueueService)) private messageQueueService: WrapperType<MessageQueueService>,
+    @Inject(forwardRef(() => ClientService))
+    private readonly clientService: WrapperType<ClientService>,
+
+    @Inject(forwardRef(() => Asterisk))
+    private readonly asteriskCommand: WrapperType<Asterisk>,
+
+    @Inject(forwardRef(() => MessageQueueService))
+    private readonly messageQueueService: WrapperType<MessageQueueService>,
   ) {
     this.client = clientService.getClient();
   }

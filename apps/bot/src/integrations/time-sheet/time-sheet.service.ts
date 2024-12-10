@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AxiosService } from "#src/integrations";
 import { Config } from "#src/config";
-import { normalizeString, formatDayMonth, getUserNameByEmail } from "#src/integrations";
+import { normalizeString, formatDayMonth, getUserNameByEmail } from "#src/utils";
 import * as chrono from "chrono-node";
 import parseDuration from "parse-duration";
 import https from "https";

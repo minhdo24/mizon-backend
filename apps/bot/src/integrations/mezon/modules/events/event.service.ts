@@ -1,7 +1,6 @@
-import { Injectable, Logger, Inject, forwardRef, OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable, Logger, forwardRef, Inject } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { MezonClientService } from "#src/integrations";
-import { WrapperType } from "#src/utils";
+import { ClientService } from "#src/integrations";
 import {
   ApiMessageReaction,
   ChannelMessage,
@@ -15,49 +14,54 @@ import {
   UserChannelRemovedEvent,
   UserClanRemovedEvent,
   Events,
+  MezonClient,
 } from "mezon-sdk";
+import { type WrapperType } from "#src/utils";
 
 @Injectable()
-export class BotGateway implements OnApplicationBootstrap {
+export class BotGateway {
   private readonly logger = new Logger(BotGateway.name);
-  private client;
+  private client: MezonClient;
 
   constructor(
-    @Inject(forwardRef(() => MezonClientService)) private readonly clientService: WrapperType<MezonClientService>,
+    @Inject(forwardRef(() => ClientService))
+    private readonly clientService: WrapperType<ClientService>,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.client = clientService.getClient();
   }
 
   initEvent() {
-    for (const event of Object.keys(Events) as Array<keyof typeof Events>) {
+    for (const event in Events) {
       const eventValue =
-        Events[event] === "clan_event_created"
-          ? Events[event].replace(/_/g, "")
-          : Events[event].replace(/_event/g, "").replace(/_/g, "");
+        Events[event as keyof typeof Events] === "clan_event_created"
+          ? Events[event as keyof typeof Events].replace(/_/g, "")
+          : Events[event as keyof typeof Events].replace(/_event/g, "").replace(/_/g, "");
       this.logger.log(`Init event ${eventValue}`);
       const key = `handle${eventValue}`;
       if (key in this) {
-        this.client.on(Events[event], this[key as keyof BotGateway] as unknown as any, this);
+        const handler = this[key as keyof BotGateway];
+        this.logger.log(`Init event ${eventValue}`);
+        this.client.on(Events[event as keyof typeof Events], handler, this);
       }
     }
   }
 
-  onApplicationBootstrap() {
+  async onApplicationBootstrap() {
     this.initEvent();
   }
 
-  handletokensent = (data: TokenSentEvent) => {
+  public handletokensent(data: TokenSentEvent) {
     this.eventEmitter.emit(Events.TokenSend, data);
-  };
+  }
 
-  handlemessagebuttonclicked = (data: any) => {
+  public handlemessagebuttonclicked(data: any) {
     this.eventEmitter.emit(Events.MessageButtonClicked, data);
-  };
+  }
 
-  handlestreamingjoined = (data: StreamingJoinedEvent) => {
+  public handlestreamingjoined(data: StreamingJoinedEvent) {
     this.eventEmitter.emit(Events.StreamingJoinedEvent, data);
-  };
+  }
 
   handlestreamingleaved = (data: StreamingLeavedEvent) => {
     this.eventEmitter.emit(Events.StreamingLeavedEvent, data);
@@ -115,11 +119,12 @@ export class BotGateway implements OnApplicationBootstrap {
     console.log(msg);
   };
 
-  handlechannelmessage = async (msg: ChannelMessage) => {
+  public async handlechannelmessage(msg: ChannelMessage) {
+    console.log("handlechannelmessage", msg);
     if (msg.code) return; // ignored edited message
     (["attachments", "mentions", "references"] as (keyof ChannelMessage)[]).forEach((key) => {
       if (!Array.isArray(msg[key])) (msg[key] as unknown) = [];
     });
     this.eventEmitter.emit(Events.ChannelMessage, msg);
-  };
+  }
 }

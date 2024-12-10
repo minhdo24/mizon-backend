@@ -18,11 +18,15 @@ export class ReportDailyService {
     return users ? users.count : 1;
   }
 
-  public reportDaily(date: Date): {
-    // report daily
-  };
-
   public getUserNotDaily(date: Date) {
     // call api get user not daily
+    const result: { notDaily: any[] } = {
+      notDaily: [],
+    };
+    return result;
+  }
+
+  public reportDaily(date: Date): void {
+    // report daily
   }
 }

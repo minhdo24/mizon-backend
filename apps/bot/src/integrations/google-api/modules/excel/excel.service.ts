@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { Config } from "#src/config";
 import { GoogleApiService } from "../../google-api.service";
 import { type WrapperType, getPreviousWorkingDay } from "#src/utils";
+import { ReportDailyService, WorkFromHomeService, TrackerService } from "#src/integrations";
 import moment from "moment";
 
 export type ReportType = "daily" | "komu" | "tracker" | "office";
@@ -17,6 +18,15 @@ export class ExcelService {
     private readonly configService: ConfigService<Config>,
     @Inject(forwardRef(() => GoogleApiService))
     private readonly googleApiService: WrapperType<GoogleApiService>,
+
+    @Inject(forwardRef(() => ReportDailyService))
+    private readonly reportDailyService: WrapperType<ReportDailyService>,
+
+    @Inject(forwardRef(() => WorkFromHomeService))
+    private readonly workFromHomeService: WrapperType<WorkFromHomeService>,
+
+    @Inject(forwardRef(() => TrackerService))
+    private readonly trackerService: WrapperType<TrackerService>,
   ) {}
 
   private getSheetName(reportDate: Moment): string {
@@ -239,9 +249,11 @@ export class ExcelService {
 
       const [daily, mention, wfh, tracker] = await Promise.all([
         this.reportDailyService.getUserNotDaily(parsedDate),
-        this.reportWFHService.reportMachleo(parsedDate),
-        this.reportWFHService.reportWfh([, formatedDate], false),
-        this.reportTrackerService.reportTrackerNot([, formatedDate], false),
+        this.workFromHomeService.reportMachleo(parsedDate),
+        // eslint-disable-next-line no-sparse-arrays
+        this.workFromHomeService.reportWfh([, formatedDate], false),
+        // eslint-disable-next-line no-sparse-arrays
+        this.trackerService.reportTrackerNot([, formatedDate], false),
       ]);
 
       const notDaily = daily?.notDaily;
@@ -264,7 +276,7 @@ export class ExcelService {
         sheetUrl: `https://docs.google.com/spreadsheets/d/${sheetId}`,
       };
     } catch (error) {
-      this.logger.error("calculateAndUpdateSheet_error", error);
+      this.logger.error("reportSheet_error", error);
       throw error;
     }
   }

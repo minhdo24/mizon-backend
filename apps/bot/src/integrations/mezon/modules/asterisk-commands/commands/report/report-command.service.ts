@@ -1,14 +1,18 @@
 /* eslint-disable no-case-declarations */
-"use strict";
-import { Command } from "#src/integrations";
+import { Command } from "#src/integrations/mezon/decorators";
 import moment from "moment";
 import { FineReportSchedulerService } from "#src/integrations";
 import { CommandMessage } from "../../abstracts";
 import { ChannelMessage } from "mezon-sdk";
+import { forwardRef, Inject } from "@nestjs/common";
+import { type WrapperType } from "#src/utils";
 
 @Command("report")
 export class ReportCommandService extends CommandMessage {
-  constructor(private readonly fineReportSchedulerService: FineReportSchedulerService) {
+  constructor(
+    @Inject(forwardRef(() => FineReportSchedulerService))
+    private readonly fineReportSchedulerService: WrapperType<FineReportSchedulerService>,
+  ) {
     super();
   }
 
@@ -16,6 +20,7 @@ export class ReportCommandService extends CommandMessage {
     const firstArg = args[0];
     switch (firstArg) {
       case "saodo":
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const validUserId = ["1800396411926220800", "1820647107783036928", "1783444920736944128"];
         if (args[1]) {
           if (

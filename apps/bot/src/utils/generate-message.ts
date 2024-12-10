@@ -1,5 +1,6 @@
 import moment from "moment";
 import { ApiMessageRef, ChannelMessage } from "mezon-sdk";
+import { ReplyMezonMessage } from "#src/integrations";
 
 export function getPreviousWorkingDay(date: moment.Moment = moment()): moment.Moment {
   let previousDay = date.subtract(1, "day"); // Start with the day before the given date
@@ -42,16 +43,16 @@ export function replyMessageGenerate(
   hasRef: boolean = true,
   newRef?: ApiMessageRef[],
 ): ReplyMezonMessage {
-  const replayMessage: ReplyMezonMessage = {} as ReplyMezonMessage;
-  const defaultValue: any = {
+  const replayMessage: any = {} as ReplyMezonMessage;
+  const defaultValue: { mentions: any[]; attachments: any[] } = {
     mentions: [],
     attachments: [],
   };
   ["clan_id", "channel_id", "mode", "is_public", ...Object.keys(defaultValue)].forEach(
-    (field) => (replayMessage[field] = fieldGenerate(field, replayConent, message, defaultValue)),
+    (field: any) => (replayMessage[field] = fieldGenerate(field, replayConent, message, defaultValue)),
   );
 
-  const messageContent: { [key: string]: any } = {
+  const messageContent: any = {
     t: "messageContent" in replayConent ? replayConent["messageContent"] : "",
   };
 
@@ -66,5 +67,5 @@ export function replyMessageGenerate(
 
   replayMessage["ref"] = hasRef ? (newRef?.length ? newRef : refGenerate(message)) : [];
 
-  return replayMessage;
+  return replayMessage as ReplyMezonMessage;
 }

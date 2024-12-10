@@ -1,2 +1,2 @@
-export * from "./channel-message";
+export * from "./listeners.service";
 export * from "./listener.module";

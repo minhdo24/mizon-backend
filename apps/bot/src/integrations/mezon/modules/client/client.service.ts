@@ -2,11 +2,11 @@
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
 import { MezonClient } from "mezon-sdk";
-import { MESSAGE_MODE } from "#src/integrations";
+import { MESSAGE_MODE, ReactMessageChannel, ReplyMezonMessage } from "#src/integrations";
 
 @Injectable()
-export class MezonClientService {
-  private logger = new Logger(MezonClientService.name);
+export class ClientService {
+  private logger = new Logger(ClientService.name);
   private token: string;
   private client: MezonClient;
 
@@ -23,6 +23,10 @@ export class MezonClientService {
       this.logger.error("error authenticating.", error);
       throw error;
     }
+  }
+
+  async onApplicationBootstrap() {
+    await this.initializeClient();
   }
 
   getClient(): MezonClient {

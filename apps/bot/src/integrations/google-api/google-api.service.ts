@@ -8,15 +8,15 @@ import { Config } from "#src/config";
 export class GoogleApiService {
   private readonly logger = new Logger(GoogleApiService.name);
 
-  private readonly sheetClientId = this.configService.getOrThrow("sheet.sheetClientId");
+  private readonly sheetClientId = this.configService.getOrThrow("sheet.sheetClientId", { infer: true });
 
-  private readonly sheetClientSecret = this.configService.getOrThrow("sheet.sheetClientSecret");
+  private readonly sheetClientSecret = this.configService.getOrThrow("sheet.sheetClientSecret", { infer: true });
 
-  private readonly sheetRedirectURI = this.configService.getOrThrow("sheet.sheetRedirectURI");
+  private readonly sheetRedirectURI = this.configService.getOrThrow("sheet.sheetRedirectURI", { infer: true });
 
-  private readonly sheetRefreshToken = this.configService.getOrThrow("sheet.sheetRefreshToken");
+  private readonly sheetRefreshToken = this.configService.getOrThrow("sheet.sheetRefreshToken", { infer: true });
 
-  private readonly sheetFineId = this.configService.getOrThrow("sheet.sheetFineId");
+  private readonly sheetFineId = this.configService.getOrThrow("sheet.sheetFineId", { infer: true });
 
   private readonly client: OAuth2Client;
 

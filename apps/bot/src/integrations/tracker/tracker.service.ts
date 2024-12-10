@@ -22,7 +22,7 @@ export class TrackerService {
     this.baseUrl = this.configService.getOrThrow("tracker.baseUrl", { infer: true });
   }
 
-  async reportTracker(args: string[], returnMsg = true): Promise<string[]> {}
+  async reportTracker(args: string[], returnMsg = true) {}
 
   private processUserWfhs(data: any[], wfhUsers: any[], usersOffWork: any[]) {
     const userWfhs = [];
@@ -44,7 +44,7 @@ export class TrackerService {
 
   private splitMessage(message: string, maxLength: number) {}
 
-  async reportTrackerNot(args, returnMsg = true) {}
+  async reportTrackerNot(args: any, returnMsg = true) {}
 
   prependMessage(array: string[], message: string) {
     array.unshift(message);
